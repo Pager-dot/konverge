@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime, date
@@ -641,6 +643,22 @@ def get_stats():
     }
 
 
+# ── Serve Frontend Static Files ───────────────
+# Must be registered AFTER all API routes so API routes take priority.
+@app.get("/admin", include_in_schema=False)
+@app.get("/admin.html", include_in_schema=False)
+def serve_admin():
+    return FileResponse("admin.html")
+
+@app.get("/", include_in_schema=False)
+@app.get("/index.html", include_in_schema=False)
+def serve_index():
+    return FileResponse("index.html")
+
+# Serve config.js and any other static assets
+app.mount("/", StaticFiles(directory="."), name="static")
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=7860)

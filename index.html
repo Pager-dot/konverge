@@ -1674,7 +1674,7 @@ body::before{
 /* ═══════════════════════════════════════════════════
    CONFIG & STATE
 ═══════════════════════════════════════════════════ */
-const API       = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE) ? CONFIG.API_BASE : 'http://localhost:8000';
+const API       = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE !== undefined) ? CONFIG.API_BASE : 'http://localhost:8000';
 const PAGE_SIZE = 10;
 
 const state = {

@@ -1576,7 +1576,8 @@
        CONFIG
     ───────────────────────────────────────────────────── */
     const API = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE) ? CONFIG.API_BASE : 'http://localhost:8000';
-    const ADMIN_EMAIL = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_EMAIL) ? CONFIG.ADMIN_EMAIL : 'kparitosh760@gmail.com';
+    const ADMIN_EMAILS = (typeof CONFIG !== 'undefined' && CONFIG.ADMIN_EMAILS) ? CONFIG.ADMIN_EMAILS : ['kparitosh760@gmail.com'];
+    const ADMIN_EMAIL = ADMIN_EMAILS[0]; // kept for legacy references
     const CLIENT_ID = (typeof CONFIG !== 'undefined' && CONFIG.GOOGLE_CLIENT_ID) ? CONFIG.GOOGLE_CLIENT_ID : '';
 
     let adminUser = null;
@@ -1645,7 +1646,7 @@
       const payload = parseJwt(response.credential);
       if (!payload) { showGateError('Sign-in failed. Please try again.'); return; }
 
-      if (payload.email !== ADMIN_EMAIL) {
+      if (!ADMIN_EMAILS.includes(payload.email)) {
         showGateError(
           `Access denied. This panel is only accessible to ADMIN. You signed in as ${payload.email}.`
         );
@@ -2017,7 +2018,7 @@
       try {
         adminUser = JSON.parse(savedAdmin);
         // Verify it's still the right person
-        if (adminUser.email === ADMIN_EMAIL) {
+        if (ADMIN_EMAILS.includes(adminUser.email)) {
           activateAdminPanel();
         } else {
           sessionStorage.removeItem('admin_user');

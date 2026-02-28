@@ -18,14 +18,19 @@ const CONFIG = {
   GOOGLE_CLIENT_ID: "175096449908-avt2v9l07tag5sp36d6ugp8kquogpqvm.apps.googleusercontent.com",
 
   /**
-   * The only Gmail address that is allowed to access the Admin panel.
-   * Change this if the admin email changes.
+   * Gmail addresses that are allowed to access the Admin panel.
+   * Add or remove emails from this array as needed.
    */
-  ADMIN_EMAIL: "kparitosh760@gmail.com",
+  ADMIN_EMAILS: [
+    "kparitosh760@gmail.com",
+    "shahriyartaufik@gmail.com",
+  ],
 
   /**
    * Backend API base URL.
    * Change this when deploying to production.
    */
-  API_BASE: "http://localhost:8000",
+  // Empty string = same origin. Works for both local dev (if you run on 7860)
+  // and HuggingFace Spaces where the API and frontend share one URL.
+  API_BASE: "",
 };
