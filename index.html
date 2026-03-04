@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CareerNest — Centralized Job & Internship Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<!-- Config (fill values from .env) -->
+<script src="config.js"></script>
+<!-- Google Identity Services -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+<!-- Scroll Progress -->
+<div id="scroll-progress" aria-hidden="true"></div>
+
+<!-- SVG ICONS -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="ico-search"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+    <symbol id="ico-bookmark"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+    <symbol id="ico-bookmark-fill" viewBox="0 0 24 24" fill="currentColor"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></symbol>
+    <symbol id="ico-map"       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="ico-clock"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></symbol>
+    <symbol id="ico-users"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="ico-dollar"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></symbol>
+    <symbol id="ico-briefcase" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+    <symbol id="ico-link"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="ico-x"         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="ico-arrow-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+    <symbol id="ico-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></symbol>
+    <symbol id="ico-filter"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></symbol>
+    <symbol id="ico-eye"       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="ico-check"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+    <symbol id="ico-wifi"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></symbol>
+    <symbol id="ico-chevron-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="ico-calendar"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
+    <symbol id="ico-send"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+    <symbol id="ico-trash"     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="ico-apps"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></symbol>
+    <symbol id="ico-building"  viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="12" rx="1"/><path d="M3 9V7a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v2"/></symbol>
+    <symbol id="ico-star"      viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol>
+    <symbol id="ico-shield"    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+    <symbol id="ico-zap"       viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+  </defs>
+</svg>
+
+<!-- ══ NAV ═══════════════════════════════════════════ -->
+<nav id="nav" role="navigation" aria-label="Main navigation">
+  <div class="nav-brand">
+    <div class="nav-logo" aria-hidden="true">CN</div>
+    <span class="nav-title serif">CareerNest<span></span></span>
+  </div>
+
+  <div class="nav-search" role="search">
+    <svg width="15" height="15" aria-hidden="true"><use href="#ico-search"/></svg>
+    <input id="nav-search-input" type="search" placeholder="Search jobs, skills, companies…" aria-label="Search job listings"/>
+  </div>
+
+  <div class="nav-actions">
+    <!-- Page tabs -->
+    <button class="nav-tab active" id="tab-jobs" onclick="showPage('jobs')" aria-label="Browse jobs">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-briefcase"/></svg> Jobs
+    </button>
+    <button class="nav-tab hidden" id="tab-apps" onclick="showPage('applications')" aria-label="My applications">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-apps"/></svg> My Apps
+      <span class="nav-tab-dot" id="apps-dot" style="display:none"></span>
+    </button>
+    <button class="nav-btn" id="bookmarks-btn" aria-label="View bookmarked jobs">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-bookmark"/></svg>
+      Saved
+      <span class="nav-bookmark-count" id="bookmark-count" aria-live="polite">0</span>
+    </button>
+
+    <!-- Google Sign-In (shown when logged out) -->
+    <button class="nav-btn" id="nav-signin-btn" aria-label="Sign in with Google">
+      <svg width="14" height="14" aria-hidden="true" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Sign In
+    </button>
+
+    <!-- Profile dropdown (shown when logged in) -->
+    <div class="profile-wrapper hidden" id="profile-wrapper">
+      <button class="profile-btn" id="profile-btn" aria-label="User menu" aria-expanded="false" aria-haspopup="true">
+        <img class="profile-avatar" id="profile-avatar-img" src="" alt="Profile picture" style="display:none"/>
+        <div class="profile-avatar-placeholder" id="profile-avatar-placeholder" aria-hidden="true">?</div>
+        <span class="profile-name-text" id="profile-name-text">User</span>
+        <svg class="profile-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
+      <div class="profile-dropdown hidden" id="profile-dropdown" role="menu">
+        <div class="profile-dropdown-header">
+          <img class="profile-dropdown-avatar" id="dd-avatar-img" src="" alt="" style="display:none"/>
+          <div class="profile-dropdown-avatar-placeholder" id="dd-avatar-placeholder" aria-hidden="true">?</div>
+          <div>
+            <div class="profile-dropdown-name" id="dd-name">—</div>
+            <div class="profile-dropdown-email" id="dd-email">—</div>
+          </div>
+        </div>
+        <div class="profile-dropdown-divider"></div>
+        <button class="profile-dropdown-item" onclick="showPage('applications')" role="menuitem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          My Applications
+        </button>
+        <div class="profile-dropdown-divider"></div>
+        <button class="profile-dropdown-item danger" id="signout-btn" role="menuitem">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+
+    <a class="nav-btn primary" href="admin.html" aria-label="Post a job (admin)">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-zap"/></svg>
+      Post a Job
+    </a>
+  </div>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════════════════ -->
+<section id="hero" aria-labelledby="hero-heading">
+  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
+
+  <div class="hero-eyebrow" role="banner">
+    Centralized Opportunity Management
+  </div>
+
+  <h1 class="hero-h1 serif" id="hero-heading">
+    Your next chapter<br/>starts <em>right here.</em>
+  </h1>
+  <p class="hero-sub">
+    All internships and job openings — from every channel — in one searchable platform built for ambitious students.
+  </p>
+
+  <!-- Dual CTAs -->
+  <div class="hero-ctas">
+    <button class="btn-primary" onclick="document.getElementById('jobs-area').scrollIntoView({behavior:'smooth'})">
+      <svg width="16" height="16" aria-hidden="true"><use href="#ico-search"/></svg>
+      Browse Opportunities
+    </button>
+    <button class="btn-secondary" onclick="window.location.href='admin.html'">
+      <svg width="16" height="16" aria-hidden="true"><use href="#ico-briefcase"/></svg>
+      Post a Job
+    </button>
+  </div>
+
+  <!-- Animated stats -->
+  <div class="hero-stats" id="hero-stats" role="region" aria-label="Platform statistics">
+    <div class="stat-item">
+      <span class="stat-num" id="stat-jobs">—</span>
+      <span class="stat-label">Live Listings</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-companies">—</span>
+      <span class="stat-label">Companies</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-applications">—</span>
+      <span class="stat-label" id="stat-apps-label">Applications</span>
+    </div>
+    <div class="stat-divider" aria-hidden="true"></div>
+    <div class="stat-item">
+      <span class="stat-num" id="stat-internships">—</span>
+      <span class="stat-label">Internships</span>
+    </div>
+  </div>
+
+  <!-- Trust badges -->
+  <div class="trust-badges" role="list" aria-label="Platform trust signals">
+    <div class="trust-badge" role="listitem">
+      <svg width="13" height="13" aria-hidden="true"><use href="#ico-check"/></svg>
+      Verified Listings
+    </div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-badge" role="listitem">
+      <svg width="13" height="13" aria-hidden="true"><use href="#ico-shield"/></svg>
+      No Spam
+    </div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-badge" role="listitem">
+      <svg width="13" height="13" aria-hidden="true"><use href="#ico-zap"/></svg>
+      Updated Daily
+    </div>
+    <div class="trust-sep" aria-hidden="true"></div>
+    <div class="trust-badge" role="listitem">
+      <svg width="13" height="13" aria-hidden="true"><use href="#ico-users"/></svg>
+      10+ Students
+    </div>
+  </div>
+</section>
+
+<!-- ══ JOBS PAGE ══════════════════════════════════════ -->
+<div id="jobs-page" class="page active">
+  <main id="main" role="main">
+
+    <!-- Mobile filter toggle -->
+    <button id="mobile-filter-btn" aria-expanded="false" aria-controls="sidebar">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-filter"/></svg>
+      Filters
+      <span id="mobile-filter-count" class="active-filter-badge" style="display:none">0</span>
+    </button>
+
+    <!-- Sidebar backdrop (mobile) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- ── SIDEBAR ─────────────────────────────────── -->
+    <aside id="sidebar" aria-label="Job filters">
+      <div class="sidebar-header-bar">
+        <div class="sidebar-title-row">
+          <span class="sidebar-title">Filters</span>
+          <span class="active-filter-badge" id="active-filter-badge" style="display:none">0</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <button class="clear-btn" id="clear-filters-btn" aria-label="Clear all filters">Clear all</button>
+          <button class="sidebar-close-btn" id="sidebar-close-btn" aria-label="Close filters">
+            <svg width="14" height="14" aria-hidden="true"><use href="#ico-x"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="true" aria-controls="acc-category">
+          Category
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body open" id="acc-category">
+          <div class="acc-content">
+            <select class="filter-select" id="filter-category" aria-label="Filter by category">
+              <option value="">All Categories</option>
+              <option value="Software Engineering">Software Engineering</option>
+              <option value="Data Science">Data Science</option>
+              <option value="Product Management">Product Management</option>
+              <option value="Design">Design</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Finance">Finance</option>
+              <option value="Operations">Operations</option>
+              <option value="Research">Research</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job Type -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="true" aria-controls="acc-type">
+          Job Type
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body open" id="acc-type">
+          <div class="acc-content">
+            <select class="filter-select" id="filter-type" aria-label="Filter by job type">
+              <option value="">All Types</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Internship">Internship</option>
+              <option value="Contract">Contract</option>
+              <option value="Freelance">Freelance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Experience -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="acc-exp">
+          Experience Level
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body" id="acc-exp">
+          <div class="acc-content">
+            <select class="filter-select" id="filter-exp" aria-label="Filter by experience level">
+              <option value="">Any Level</option>
+              <option value="Entry Level">Entry Level</option>
+              <option value="Mid Level">Mid Level</option>
+              <option value="Senior Level">Senior Level</option>
+              <option value="Lead">Lead</option>
+              <option value="Manager">Manager</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Location -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="acc-location">
+          Location
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body" id="acc-location">
+          <div class="acc-content">
+            <input type="text" class="filter-input" id="filter-location" placeholder="City, state or country…" aria-label="Filter by location"/>
+          </div>
+        </div>
+      </div>
+
+      <!-- Remote toggle -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="true" aria-controls="acc-remote">
+          Work Mode
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body open" id="acc-remote">
+          <div class="acc-content">
+            <div class="toggle-row">
+              <span class="toggle-label">Remote Only</span>
+              <label class="toggle" aria-label="Show remote jobs only">
+                <input type="checkbox" id="filter-remote"/>
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Salary Range Slider -->
+      <div class="acc-group">
+        <button class="acc-trigger" aria-expanded="false" aria-controls="acc-salary">
+          Min Salary
+          <svg class="acc-chevron" width="14" height="14" aria-hidden="true"><use href="#ico-chevron-down"/></svg>
+        </button>
+        <div class="acc-body" id="acc-salary">
+          <div class="acc-content">
+            <div class="range-wrap">
+              <div class="range-labels">
+                <span>₹0</span>
+                <span id="salary-display">₹<span id="salary-value">0</span>k+</span>
+              </div>
+              <input type="range" id="filter-salary" min="0" max="2000000" step="50000" value="0"
+                aria-label="Minimum salary filter" style="--pct:0%"/>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── JOBS AREA ────────────────────────────────── -->
+    <section id="jobs-area" aria-label="Job listings">
+
+      <!-- Recently viewed -->
+      <div id="recently-viewed-section">
+        <div class="section-label">
+          <svg width="12" height="12" aria-hidden="true"><use href="#ico-eye"/></svg>
+          Recently Viewed
+        </div>
+        <div class="rv-chips" id="rv-chips"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="jobs-toolbar">
+        <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">
+          <p class="jobs-count" id="jobs-count" aria-live="polite"></p>
+        </div>
+        <select class="sort-select" id="sort-select" aria-label="Sort job listings">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="salary_high">Salary: High → Low</option>
+          <option value="salary_low">Salary: Low → High</option>
+          <option value="most_applied">Most Applied</option>
+        </select>
+      </div>
+
+      <!-- Active filter tags -->
+      <div class="active-filters" id="active-filters" role="list" aria-label="Active filters"></div>
+
+      <!-- Jobs grid -->
+      <div id="jobs-grid" role="list" aria-label="Job listings">
+        <!-- Skeletons filled by JS on load -->
+      </div>
+
+      <div id="empty-state" class="hidden">
+        <div class="empty-icon" aria-hidden="true">🔍</div>
+        <h2 class="empty-title serif">No listings found</h2>
+        <p class="empty-sub">Try adjusting your filters or search terms.</p>
+      </div>
+
+      <!-- Infinite scroll sentinel -->
+      <div id="load-more-sentinel" aria-hidden="true">
+        <div class="load-spinner" id="load-spinner"></div>
+      </div>
+
+    </section>
+  </main>
+</div>
+
+<!-- ══ MY APPLICATIONS PAGE ═══════════════════════════ -->
+<div id="applications-page" class="page">
+  <section id="applications-page-content" aria-label="My Applications">
+    <div class="page-header">
+      <h2 class="serif">My Applications</h2>
+      <p>Track all your submitted applications in one place.</p>
+    </div>
+    <div class="apps-grid" id="apps-grid"></div>
+    <div id="apps-empty" class="apps-empty hidden">
+      <div class="empty-icon">📋</div>
+      <p>No applications yet. Start applying to see them here!</p>
+    </div>
+  </section>
+</div>
+
+<!-- ══ JOB DETAIL MODAL ═══════════════════════════════ -->
+<div class="modal-overlay hidden" id="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-modal-title">
+  <div class="modal" id="detail-modal-content">
+    <button class="modal-close" id="detail-close" aria-label="Close job details">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-x"/></svg>
+    </button>
+    <!-- Filled by JS -->
+  </div>
+</div>
+
+<!-- ══ APPLY MODAL ════════════════════════════════════ -->
+<div class="modal-overlay hidden apply-modal" id="apply-modal" role="dialog" aria-modal="true" aria-labelledby="apply-modal-title">
+  <div class="modal">
+    <button class="modal-close" id="apply-close" aria-label="Close application form">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-x"/></svg>
+    </button>
+    <div id="apply-modal-inner">
+      <!-- Step indicator -->
+      <div class="step-indicator" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="2" aria-label="Application step 1 of 2">
+        <div class="step-dot active" id="step-dot-1"><span>1</span></div>
+        <div class="step-line" id="step-line-1"></div>
+        <div class="step-dot" id="step-dot-2"><span>2</span></div>
+        <div style="margin-left:.65rem">
+          <div class="step-label" id="step-label">Step 1 of 2 — Your Details</div>
+        </div>
+      </div>
+
+      <div class="apply-header">
+        <h2 class="serif" id="apply-modal-title">Apply for Position</h2>
+        <p id="apply-job-subtitle" class="text-muted"></p>
+      </div>
+
+      <div class="apply-scroll-body">
+        <div class="apply-body">
+          <form id="apply-form" novalidate>
+
+            <!-- Step 1: Personal Info -->
+            <div class="apply-step active" id="apply-step-1">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="f-name">Full Name <span>*</span></label>
+                  <input class="form-input" id="f-name" type="text" placeholder="Your full name" required autocomplete="name"/>
+                  <span class="field-error hidden" id="err-name">Name is required</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-email">Email <span>*</span></label>
+                  <input class="form-input" id="f-email" type="email" placeholder="you@college.edu" required autocomplete="email"/>
+                  <span class="field-error hidden" id="err-email">Valid email required</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-phone">Phone</label>
+                  <input class="form-input" id="f-phone" type="tel" placeholder="+91-XXXXXXXXXX" autocomplete="tel"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-graduation">Graduation Year</label>
+                  <input class="form-input" id="f-graduation" type="number" placeholder="2026" min="2024" max="2030"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-institution">Institution</label>
+                  <input class="form-input" id="f-institution" type="text" placeholder="IIT Bombay"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-experience">Years of Experience</label>
+                  <input class="form-input" id="f-experience" type="number" placeholder="0" min="0" max="20" step="0.5"/>
+                </div>
+              </div>
+              <div class="step-nav">
+                <span style="font-size:.78rem;color:var(--muted)">Fields marked <span style="color:var(--gold)">*</span> are required</span>
+                <button type="button" class="btn-next" id="btn-next-1">
+                  Next: Links & Cover Letter
+                  <svg width="15" height="15" aria-hidden="true"><use href="#ico-arrow-right"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Links & Cover Letter -->
+            <div class="apply-step" id="apply-step-2">
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label class="form-label" for="f-resume">Resume URL <span>*</span></label>
+                  <input class="form-input" id="f-resume" type="url" placeholder="https://drive.google.com/…" required/>
+                  <span class="field-error hidden" id="err-resume">Resume URL required</span>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-linkedin">LinkedIn</label>
+                  <input class="form-input" id="f-linkedin" type="url" placeholder="https://linkedin.com/in/…"/>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="f-portfolio">Portfolio / GitHub</label>
+                  <input class="form-input" id="f-portfolio" type="url" placeholder="https://…"/>
+                </div>
+                <div class="form-group full">
+                  <label class="form-label" for="f-cover">Cover Letter</label>
+                  <textarea class="form-textarea" id="f-cover" placeholder="Tell us why you're a great fit…"></textarea>
+                </div>
+              </div>
+              <div class="step-nav">
+                <button type="button" class="btn-back" id="btn-back-2">
+                  <svg width="15" height="15" aria-hidden="true"><use href="#ico-arrow-left"/></svg>
+                  Back
+                </button>
+                <button class="submit-btn" type="submit" id="submit-btn">
+                  <svg width="15" height="15" aria-hidden="true"><use href="#ico-send"/></svg>
+                  Submit Application
+                </button>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GOOGLE AUTH GATE MODAL ══════════════════════════ -->
+<div class="modal-overlay hidden auth-gate-modal" id="auth-gate-modal" role="dialog" aria-modal="true" aria-labelledby="auth-gate-title">
+  <div class="modal">
+    <button class="modal-close" id="auth-gate-close" aria-label="Close sign-in dialog">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-x"/></svg>
+    </button>
+    <div class="auth-gate-body">
+      <div class="auth-gate-icon" aria-hidden="true" id="auth-gate-icon">🔐</div>
+      <h2 class="auth-gate-title serif" id="auth-gate-title">Sign in to Apply</h2>
+      <p class="auth-gate-sub" id="auth-gate-sub">
+        Sign in with your Google account to apply for this position.<br/>
+        Your name and email will be automatically filled in.
+      </p>
+      <!--
+        #gsi-button-container is where google.accounts.id.renderButton() writes
+        the real iframe-based Google button. We render into this div so the
+        actual Google button is always present and clickable — no prompt() needed.
+      -->
+      <div id="gsi-button-container" style="display:flex;justify-content:center;min-height:44px;margin-bottom:.5rem"></div>
+      <p class="auth-gate-skip" id="auth-gate-skip" role="button" tabindex="0" id="auth-gate-skip-text">Apply without signing in</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BOOKMARKS MODAL ════════════════════════════════ -->
+<div class="modal-overlay hidden bookmarks-modal" id="bookmarks-modal" role="dialog" aria-modal="true" aria-labelledby="bookmarks-modal-title">
+  <div class="modal">
+    <button class="modal-close" id="bookmarks-close" aria-label="Close bookmarks">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-x"/></svg>
+    </button>
+    <div class="bookmarks-header">
+      <h2 class="serif" id="bookmarks-modal-title">
+        <svg width="17" height="17" style="color:var(--blue);vertical-align:middle;margin-right:.35rem" aria-hidden="true"><use href="#ico-bookmark-fill"/></svg>
+        Saved Jobs
+      </h2>
+    </div>
+    <div class="bookmarks-body" id="bookmarks-list"></div>
+  </div>
+</div>
+
+<!-- ══ MOBILE BOTTOM APPLY BAR ═══════════════════════ -->
+<div id="mobile-apply-bar" aria-label="Quick apply bar" role="complementary">
+  <div class="mobile-apply-inner">
+    <div class="mobile-apply-info">
+      <div class="mobile-apply-title" id="mob-apply-title">—</div>
+      <div class="mobile-apply-company" id="mob-apply-company">—</div>
+    </div>
+    <button class="mobile-apply-btn" id="mob-apply-btn" aria-label="Apply now">
+      <svg width="14" height="14" aria-hidden="true"><use href="#ico-send"/></svg>
+      Apply Now
+    </button>
+  </div>
+</div>
+
+<!-- ══ TOAST ════════════════════════════════════════ -->
+<div id="toast-container" aria-live="assertive" aria-atomic="true"></div>
+
+<!-- ══ FOOTER ═══════════════════════════════════════ -->
+<footer>
+  <p>© 2026 <strong>CareerNest</strong> — Centralized Opportunity Management Platform</p>
+</footer>
+
+<script src="/static/script.js" defer></script>
+</body>
+</html>
